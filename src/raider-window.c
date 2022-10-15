@@ -189,7 +189,7 @@ void raider_window_open_files_finish (GObject* source_object, GAsyncResult* res,
 {
 }
 
-/* Asynchonous runner for raider_window_open_file. */
+/* Asynchronous runner for raider_window_open_file. */
 void raider_window_open_files_thread(GTask* task, gpointer source_object, gpointer task_data, GCancellable *cancellable)
 {
     RaiderWindow* window = RAIDER_WINDOW(source_object);

@@ -68,9 +68,11 @@ gchar *raider_file_row_get_filename(RaiderFileRow * row)
 {
     return g_file_get_path(row->file);
 }
-/* This version is called when the user has aborted the operation, like clicking the abort button or close button. */
+/* This version is called when the user has aborted the operation, like clicking the close button. */
 void raider_file_row_delete_on_abort(GtkWidget *widget, gpointer data)
 {
+    RaiderFileRow* row = RAIDER_FILE_ROW(data);
+    g_print("Deleting row in on_abort for file: %s\n", g_file_get_path(row->file));
     raider_window_close_file(data, GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data))), 0);
     GtkListBox *list_box = GTK_LIST_BOX(gtk_widget_get_parent(GTK_WIDGET(data)));
     gtk_list_box_remove(list_box, GTK_WIDGET(data));
@@ -78,6 +80,8 @@ void raider_file_row_delete_on_abort(GtkWidget *widget, gpointer data)
 /* This version of delete tells the raider_window_close_file function to show a toast that shredding is done. */
 void raider_file_row_delete_on_finish(GtkWidget *widget, gpointer data)
 {
+    RaiderFileRow* row = RAIDER_FILE_ROW(data);
+    g_print("Deleting row in on_finish: %s\n", g_file_get_path(row->file));
     raider_window_close_file(data, GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(data))), 1);
     GtkListBox *list_box = GTK_LIST_BOX(gtk_widget_get_parent(GTK_WIDGET(data)));
     gtk_list_box_remove(list_box, GTK_WIDGET(data));
@@ -182,6 +186,7 @@ RaiderFileRow *raider_file_row_new(GFile *file)
 void on_complete_finish(GObject* source_object, GAsyncResult* res, gpointer user_data)
 {
     RaiderFileRow* row = RAIDER_FILE_ROW(user_data);
+    g_print("In on_complete_finish for file: %s\n", g_file_get_path(row->file));
     gchar* message = raider_shred_backend_get_return_result_string(row->backend);
 
     /* If the message does not contain 'good' */
@@ -203,11 +208,13 @@ void on_complete_finish(GObject* source_object, GAsyncResult* res, gpointer user
 /* This is ALWAYS ALWAYS called when the shred executable exits. */
 static void finish_shredding(GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+    g_print("In finish_shredding\n");
     /* BUT BUT it may return immediately if shredding has been aborted. */
     if (g_cancellable_is_cancelled (wait_cancel))
         return;
 
     RaiderFileRow *row = RAIDER_FILE_ROW(user_data);
+    g_print("Finished shredding file: %s\n", g_file_get_path(row->file));
 
     /* Remove the timeout. */
     gboolean removed_timeout = g_source_remove(row->timeout_id);
@@ -222,6 +229,7 @@ static void finish_shredding(GObject *source_object, GAsyncResult *res, gpointer
 void raider_file_row_launch_shredding(gpointer data)
 {
     RaiderFileRow *row = RAIDER_FILE_ROW(data);
+    g_print("Launching shredding on file: %s\n", g_file_get_path(row->file));
     GError *error = NULL;
 
     /* One liner settings. */
@@ -332,7 +340,7 @@ void raider_file_row_launch_shredding(gpointer data)
 void raider_file_row_shredding_abort(gpointer data)
 {
     RaiderFileRow *row = RAIDER_FILE_ROW(data);
-
+    g_print("Abort requested on file: %s\n", g_file_get_path(row->file));
     g_cancellable_cancel(wait_cancel);
 
     /* Normally this is done in finish_shredding but it will not be called. */
