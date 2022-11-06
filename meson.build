@@ -17,7 +17,6 @@ add_project_arguments(['-I' + meson.project_build_root(),], language: 'c')
 subdir('data')
 subdir('src')
 subdir('po')
-subdir('help')
 
 gnome.post_install(
   glib_compile_schemas: true,
