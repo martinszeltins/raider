@@ -1,21 +1,3 @@
-/* raider-application.c
- *
- * Copyright 2022 Alan Beveridge
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <gio/gunixmounts.h>
 #include <glib/gi18n.h>
 #include "raider-application.h"
@@ -33,7 +15,6 @@ RaiderApplication *raider_application_new(gchar * application_id, GApplicationFl
     return g_object_new(RAIDER_TYPE_APPLICATION, "application-id", application_id, "flags", flags, NULL);
 }
 
-/* Actions. */
 static void raider_new_window(GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
     RaiderWindow *window = g_object_new(RAIDER_TYPE_WINDOW, "application", GTK_APPLICATION(user_data), NULL);
@@ -102,24 +83,6 @@ static void raider_application_try_exit (GSimpleAction *action, GVariant *parame
         g_application_quit(G_APPLICATION(user_data));
     }
 }
-
-/* NOTE: NOT USED BECAUSE FLATPAK REMOVES ACCESS TO DEVICE FILES. */
-/*static void raider_application_open_drive(GSimpleAction *action, GVariant *parameter, gpointer user_data)
-{
-    GtkWindow *window = gtk_application_get_active_window(GTK_APPLICATION(user_data));
-
-    GUnixMountEntry *unix_mount = g_unix_mount_at(g_variant_get_string(parameter, NULL), NULL);
-    const gchar *path = g_unix_mount_get_device_path(unix_mount); // This returns something like /dev/sdb1.
-
-    GFile *title = g_file_new_for_path(g_variant_get_string(parameter, NULL));
-    gchar* name = g_file_get_basename(title);
-    g_object_unref(title);
-
-    raider_window_open(g_file_new_for_path(path), window, name);
-
-    g_free(name);
-}
-*/
 
 static void raider_application_show_about(GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
@@ -237,11 +200,6 @@ static void raider_application_init(RaiderApplication *self)
     g_autoptr(GSimpleAction) help_action = g_simple_action_new("help", NULL);
     g_signal_connect (help_action, "activate", G_CALLBACK(raider_application_show_help), self);
     g_action_map_add_action(G_ACTION_MAP(self), G_ACTION(help_action));
-
-    /* NOTE: NOT USED BECAUSE FLATPAK REMOVES ACCESS TO DEVICE FILES. */
-    /*g_autoptr(GSimpleAction) open_drive_action = g_simple_action_new("open-drive", G_VARIANT_TYPE_STRING);
-    g_signal_connect(open_drive_action, "activate", G_CALLBACK(raider_application_open_drive), self);
-    g_action_map_add_action(G_ACTION_MAP(self), G_ACTION(open_drive_action));*/
 
     gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.quit", (const char *[]){"<Ctrl>q",NULL,});
     gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.open", (const char *[]){"<Ctrl>o",NULL,});
